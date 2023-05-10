@@ -365,7 +365,9 @@ spec:
         forProvider:
           region: us-east-1
           routeTableIdSelector:
-            matchControllerRef: true
+#            matchControllerRef: true
+            matchLabels:
+              name: defaultRouteTable
           subnetIdSelector:
             matchControllerRef: true
           gatewayIdSelector:
