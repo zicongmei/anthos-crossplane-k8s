@@ -9,5 +9,3 @@ spec:
       namespace: crossplane-config
       name: aws-creds
       key: creds
-  endpoint:
-    signingRegion: us-east-1
