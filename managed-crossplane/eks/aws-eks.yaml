@@ -366,6 +366,7 @@ spec:
           region: us-east-1
           routeTableIdSelector:
 #            matchControllerRef: true
+            matchControllerRef: false
             matchLabels:
               name: defaultRouteTable
           subnetIdSelector:
