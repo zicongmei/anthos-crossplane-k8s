@@ -365,10 +365,10 @@ spec:
         forProvider:
           region: us-east-1
           routeTableIdSelector:
-#            matchControllerRef: true
-            matchControllerRef: false
-            matchLabels:
-              name: defaultRouteTable
+            matchControllerRef: true
+#            matchControllerRef: false
+#            matchLabels:
+#              name: defaultRouteTable
           subnetIdSelector:
             matchControllerRef: true
           gatewayIdSelector:
