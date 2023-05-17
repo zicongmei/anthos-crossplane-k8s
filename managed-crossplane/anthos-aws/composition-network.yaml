@@ -1,0 +1,301 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: anthos-aws-network
+  labels:
+    crossplane.io/xrd: compositenetwork.demo.anthos.com
+    cluster: anthos-aws
+spec:
+  compositeTypeRef:
+    apiVersion: demo.anthos.com/v1
+    kind:  CompositeNetwork
+  patchSets:
+  - name: metadata
+    patches:
+    - fromFieldPath: metadata.labels
+  resources:
+  - name: anthos-aws-role
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: Role
+      metadata:
+        labels:
+          role: anthos-aws-role
+        name: anthos-aws-role
+      spec:
+        providerConfigRef: 
+          name: default-aws
+        forProvider:
+          assumeRolePolicy: |
+            {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "",
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Federated": "accounts.google.com"
+                  },
+                  "Action": "sts:AssumeRoleWithWebIdentity",
+                  "Condition": {
+                    "StringEquals": {
+                      "accounts.google.com:sub": "service-'$PROJECT_NUMBER'@gcp-sa-gkemulticloud.iam.gserviceaccount.com"
+                    }
+                  }
+                }
+              ]
+            }
+          path: /
+  - name: anthos-aws-policy
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: Policy
+      metadata:
+        name: anthos-aws-policy
+        labels:
+          role: anthos-aws-policy
+      spec:
+        providerConfigRef:
+          name: default-aws
+        forProvider:
+          description: Permissions needed by https://cloud.google.com/anthos/clusters/docs/multi-cloud/aws/how-to/create-aws-iam-roles#create_scoped_permissions
+          policy: |
+            {
+              "Statement": [
+              {
+                "Sid": "",
+                "Effect": "Allow",
+                "Action": [
+                  "ec2:AuthorizeSecurityGroupEgress",
+                  "ec2:AuthorizeSecurityGroupIngress",
+                  "ec2:CreateLaunchTemplate",
+                  "ec2:CreateNetworkInterface",
+                  "ec2:CreateSecurityGroup",
+                  "ec2:CreateTags",
+                  "ec2:CreateVolume",
+                  "ec2:DeleteLaunchTemplate",
+                  "ec2:DeleteNetworkInterface",
+                  "ec2:DeleteSecurityGroup",
+                  "ec2:DeleteTags",
+                  "ec2:DeleteVolume",
+                  "ec2:DescribeAccountAttributes",
+                  "ec2:DescribeInstances",
+                  "ec2:DescribeInternetGateways",
+                  "ec2:DescribeKeyPairs",
+                  "ec2:DescribeLaunchTemplates",
+                  "ec2:DescribeNetworkInterfaces",
+                  "ec2:DescribeSecurityGroupRules",
+                  "ec2:DescribeSecurityGroups",
+                  "ec2:DescribeSubnets",
+                  "ec2:DescribeVpcs",
+                  "ec2:GetConsoleOutput",
+                  "ec2:ModifyNetworkInterfaceAttribute",
+                  "ec2:ModifyInstanceAttribute",
+                  "ec2:RevokeSecurityGroupEgress",
+                  "ec2:RevokeSecurityGroupIngress",
+                  "ec2:RunInstances",
+                  "iam:AWSServiceName",
+                  "iam:CreateServiceLinkedRole",
+                  "iam:PassRole",
+                  "autoscaling:CreateAutoScalingGroup",
+                  "autoscaling:CreateOrUpdateTags",
+                  "autoscaling:DeleteAutoScalingGroup",
+                  "autoscaling:DeleteTags",
+                  "autoscaling:DescribeAutoScalingGroups",
+                  "autoscaling:DisableMetricsCollection",
+                  "autoscaling:EnableMetricsCollection",
+                  "autoscaling:TerminateInstanceInAutoScalingGroup",
+                  "autoscaling:UpdateAutoScalingGroup",
+                  "elasticloadbalancing:AddTags",
+                  "elasticloadbalancing:CreateListener",
+                  "elasticloadbalancing:CreateLoadBalancer",
+                  "elasticloadbalancing:CreateTargetGroup",
+                  "elasticloadbalancing:DeleteListener",
+                  "elasticloadbalancing:DeleteLoadBalancer",
+                  "elasticloadbalancing:DeleteTargetGroup",
+                  "elasticloadbalancing:DescribeListeners",
+                  "elasticloadbalancing:DescribeLoadBalancers",
+                  "elasticloadbalancing:DescribeTargetGroups",
+                  "elasticloadbalancing:DescribeTargetHealth",
+                  "elasticloadbalancing:ModifyTargetGroupAttributes",
+                  "elasticloadbalancing:RemoveTags",
+                  "kms:DescribeKey",
+                  "kms:Encrypt",
+                  "kms:GenerateDataKeyWithoutPlaintext"
+                ],
+                "Resource": "*"
+              },
+              "Version": "2012-10-17"
+            }
+  - name: anthos-aws-iamattachment
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: RolePolicyAttachment
+      metadata:
+        name: anthos-aws-iamattachment
+      spec:
+        providerConfigRef: 
+          name: default-aws
+        forProvider:
+          policyArnSelector:
+            matchLabels:
+              role: anthos-aws-policy
+          roleSelector:
+            matchLabels:
+              role: anthos-aws-role
+  - name: vpc-eks
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: VPC
+      metadata:
+        name: sample-vpc
+      spec:
+        providerConfigRef: 
+          name: default-aws
+        forProvider:
+          region: us-east-1
+          cidrBlock: 10.0.0.0/16
+          tags:
+            Name: sample-vpc
+    patches:
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations[crossplane.io/external-name]
+      toFieldPath: status.vpcId
+
+  - name: subnet-nodepool-1a
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: Subnet
+      metadata:
+        name: subnet-nodepool-1a
+        labels:
+          zone: us-east-1a
+          access: public
+          role: nodegroup
+      spec:
+        providerConfigRef: 
+          name: default-aws
+        forProvider:
+          region: us-east-1
+          availabilityZone: us-east-1a
+          cidrBlock: 10.0.0.0/24
+          vpcIdSelector:
+            matchControllerRef: true
+          mapPublicIpOnLaunch: true
+          tags:
+            Name: subnet-nodepool-1a
+  - name: subnet-nodepool-1b
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: Subnet
+      metadata:
+        name: subnet-nodepool-1b
+        labels:
+          zone: us-east-1b
+          access: public
+          role: nodegroup
+      spec:
+        providerConfigRef: 
+          name: default-aws
+        forProvider:
+          region: us-east-1
+          availabilityZone: us-east-1b
+          cidrBlock: 10.0.1.0/24
+          vpcIdSelector:
+            matchControllerRef: true
+          mapPublicIpOnLaunch: true
+          tags:
+            Name: subnet-nodepool-1b
+  - name: subnet-nodepool-1c
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: Subnet
+      metadata:
+        name: subnet-nodepool-1c
+        labels:
+          zone: us-east-1c
+          access: public
+          role: nodegroup
+      spec:
+        providerConfigRef: 
+          name: default-aws
+        forProvider:
+          region: us-east-1
+          availabilityZone: us-east-1c
+          cidrBlock: 10.0.2.0/24
+          vpcIdSelector:
+            matchControllerRef: true
+          mapPublicIpOnLaunch: true
+          tags:
+            Name: subnet-nodepool-1c
+  - name: inet-gateway
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: InternetGateway
+      metadata:
+        name: routegw
+        labels:
+          name: routegw
+      spec:
+        providerConfigRef: 
+          name: default-aws
+        forProvider:
+          region: us-east-1
+          vpcIdSelector:
+            matchControllerRef: true
+          tags:
+            Name: eks-cluster
+  - name: route-to-ig
+    base:
+      apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
+      kind: DefaultRouteTable
+      metadata:
+        name: routetoIG
+        labels:
+          name: defaultRouteTable
+      spec:
+        providerConfigRef:
+          name: default-aws
+        forProvider:
+          defaultRouteTableIdSelector:
+            matchControllerRef: true
+          region: us-east-1
+          route:
+            - cidrBlock: 0.0.0.0/0
+              gatewayIdSelector:
+                matchControllerRef: true
+  - name: database-encryption-kms-key
+    base:
+      apiVersion: kms.aws.gke.cloud.google.com/v1beta1
+      kind: Key
+      metadata:
+        labels:
+          usage: database-encryption-kms-key
+        name: database-encryption-kms-key
+      spec:
+        forProvider:
+          description: database-encryption-kms-key
+          region: us-east-1
+  - name: config-encryption-kms-key
+    base:
+      apiVersion: kms.aws.gke.cloud.google.com/v1beta1
+      kind: Key
+      metadata:
+        labels:
+          usage: config-encryption-kms-key
+        name: config-encryption-kms-key
+      spec:
+        forProvider:
+          description: config-encryption-kms-key
+          region: us-east-1
+  - name: instance-profile
+    base:
+      apiVersion: iam.aws.gke.cloud.google.com/v1beta1
+      kind: InstanceProfile
+      metadata:
+        name: instance-profile
+      spec:
+        forProvider:
+          roleSelector:
+            matchLabels:
+              role: anthos-aws-role

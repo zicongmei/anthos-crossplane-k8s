@@ -1,0 +1,43 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: compositenetwork.demo.anthos.com
+spec:
+  connectionSecretKeys:
+  - kubeconfig
+  group: demo.anthos.com
+  names:
+    kind: CompositeNetwork
+    plural: compositenetwork
+  claimNames: # this is what namespace scoped XRCs are called
+    kind: Network-xrd
+    plural: network-xrd
+  versions:
+  - name: v1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              parameters:
+                description: network configs.
+                properties:
+                  region:
+                    type: string
+                type: object
+          status:
+            type: object
+            description: The network to host the Anthos-AWS Cluster.
+            properties:
+              region:
+                type: string
+              gcpProjectNumber:
+                type: string
+    additionalPrinterColumns:
+    - name: region
+      type: string
+      jsonPath: ".status.region"

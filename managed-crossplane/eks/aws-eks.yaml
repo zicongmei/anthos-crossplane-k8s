@@ -22,9 +22,9 @@ spec:
       metadata:
         name: eks-cluster
         labels:
-         role: controlplane
+          role: controlplane
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           region: us-east-1
@@ -32,17 +32,14 @@ spec:
           roleArnSelector:
             matchControllerRef: true
           vpcConfig:
-            - subnetIdSelector:
-                matchControllerRef: true 
-              endpointPrivateAccesss: false
-              endpointPublicAccess: true 
-        writeConnectionSecretToRef:
-          name: kubeconfig
-          namespace: default  
+          - subnetIdSelector:
+              matchControllerRef: true
+            endpointPrivateAccesss: false
+            endpointPublicAccess: true
     patches:
-    # - type: ToCompositeFieldPath
-      # fromFieldPath: status.atProvider.identity.oidc.issuer
-      # toFieldPath: status.odicIssuerUrl
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.identity[0].oidc[0].issuer
+      toFieldPath: status.odicIssuerUrl
     - fromFieldPath: spec.parameters.k8sVersion
       toFieldPath: spec.forProvider.version
     - type: ToCompositeFieldPath
@@ -54,17 +51,37 @@ spec:
     - type: ToCompositeFieldPath
       fromFieldPath: spec.forProvider.region
       toFieldPath: status.region
-    - fromFieldPath: metadata.uid
-      toFieldPath: spec.writeConnectionSecretToRef.name
-      transforms:
-        - type: string
-          string:
-            fmt: "%s-ekscluster"
   #   readinessChecks:
   #   - type: MatchString
   #     fieldPath: status.atProvider.status
   #     matchString: ACTIVE
 
+  - name: clusterauth
+    base:
+      apiVersion: eks.aws.gke.cloud.google.com/v1beta1
+      kind: ClusterAuth
+      metadata:
+        name: clusterauth
+        labels:
+          role: controlplane
+      spec:
+        providerConfigRef:
+          name: default-aws
+        forProvider:
+          clusterNameSelector:
+            matchControllerRef: true
+        writeConnectionSecretToRef:
+          name: kubeconfig
+          namespace: default
+    patches:
+    - fromFieldPath: metadata.uid
+      toFieldPath: spec.writeConnectionSecretToRef.name
+      transforms:
+      - type: string
+        string:
+          fmt: "%s-ekscluster"
+    - fromFieldPath: status.region
+      toFieldPath: spec.forProvider.region
   - name: eksnodegroup
     base:
       apiVersion: eks.aws.gke.cloud.google.com/v1beta1
@@ -72,42 +89,41 @@ spec:
       metadata:
         name: eks-ng
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           clusterNameSelector:
             matchControllerRef: true
-           # matchLabels:
-           #   role: controlplane
           #instanceTypes: t3.medium
           nodeRoleArnSelector:
-            matchLabels: 
+            matchControllerRef: true
+            matchLabels:
               role: nodegroup
           region: us-east-1
           scalingConfig:
-            - desiredSize: 1
-              maxSize: 6
-              minSize: 1
+          - desiredSize: 1
+            maxSize: 6
+            minSize: 1
           subnetIdSelector:
-            matchLabels: 
+            matchControllerRef: true
+            matchLabels:
               role: nodegroup
-            #matchedControllerRef: true
     patches:
-      - fromFieldPath: spec.parameters.nodeSize
-        toFieldPath: spec.forProvider.instanceTypes[0]
-        transforms:
-        - type: map
-          map:
-            small: t3.small
-            medium: t3.medium
-            large: t3.large
-      - fromFieldPath: spec.parameters.minNodeCount
-        toFieldPath: spec.forProvider.scalingConfig[0].minSize
-      - fromFieldPath: spec.parameters.minNodeCount
-        toFieldPath: spec.forProvider.scalingConfig[0].desiredSize
-      - type: ToCompositeFieldPath
-        fromFieldPath: status.atProvider.status
-        toFieldPath: status.nodePoolStatus
+    - fromFieldPath: spec.parameters.nodeSize
+      toFieldPath: spec.forProvider.instanceTypes[0]
+      transforms:
+      - type: map
+        map:
+          small: t3.small
+          medium: t3.medium
+          large: t3.large
+    - fromFieldPath: spec.parameters.minNodeCount
+      toFieldPath: spec.forProvider.scalingConfig[0].minSize
+    - fromFieldPath: spec.parameters.minNodeCount
+      toFieldPath: spec.forProvider.scalingConfig[0].desiredSize
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.status
+      toFieldPath: status.nodePoolStatus
     # readinessChecks:
     # - type: MatchString
     #   fieldPath: status.atProvider.status
@@ -121,7 +137,7 @@ spec:
           role: controlplane
         name: controlplane
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           assumeRolePolicy: |
@@ -150,11 +166,12 @@ spec:
       metadata:
         name: cluster-policy1
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           policyArn: arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
           roleSelector:
+            matchControllerRef: true
             matchLabels:
               role: controlplane
   - name: iamrole-nodegroup
@@ -164,9 +181,9 @@ spec:
       metadata:
         labels:
           role: nodegroup
-        name: nodegroup 
+        name: nodegroup
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           assumeRolePolicy: |
@@ -194,11 +211,12 @@ spec:
       metadata:
         name: node-policy1
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           policyArn: arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
           roleSelector:
+            matchControllerRef: true
             matchLabels:
               role: nodegroup
   - name: iamattachment-cni
@@ -208,11 +226,12 @@ spec:
       metadata:
         name: node-policy2
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           policyArn: arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
           roleSelector:
+            matchControllerRef: true
             matchLabels:
               role: nodegroup
   - name: iamattachment-registry
@@ -220,13 +239,14 @@ spec:
       apiVersion: iam.aws.gke.cloud.google.com/v1beta1
       kind: RolePolicyAttachment
       metadata:
-        name: node-policy2 
+        name: node-policy2
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           policyArn: arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
           roleSelector:
+            matchControllerRef: true
             matchLabels:
               role: nodegroup
   - name: vpc-eks
@@ -236,7 +256,7 @@ spec:
       metadata:
         name: sample-vpc
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           region: us-east-1
@@ -247,7 +267,6 @@ spec:
     - type: ToCompositeFieldPath
       fromFieldPath: metadata.annotations[crossplane.io/external-name]
       toFieldPath: status.vpcId
-
   - name: subnet-nodepool-1a
     base:
       apiVersion: ec2.aws.gke.cloud.google.com/v1beta1
@@ -259,7 +278,7 @@ spec:
           access: public
           role: nodegroup
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           region: us-east-1
@@ -281,7 +300,7 @@ spec:
           access: public
           role: nodegroup
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           region: us-east-1
@@ -303,7 +322,7 @@ spec:
           access: public
           role: nodegroup
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           region: us-east-1
@@ -323,7 +342,7 @@ spec:
         labels:
           name: routegw
       spec:
-        providerConfigRef: 
+        providerConfigRef:
           name: default-aws
         forProvider:
           region: us-east-1
@@ -347,7 +366,78 @@ spec:
             matchControllerRef: true
           region: us-east-1
           route:
-            - cidrBlock: 0.0.0.0/0
-              gatewayIdSelector:
-                matchControllerRef: true
-
+          - cidrBlock: 0.0.0.0/0
+            gatewayIdSelector:
+              matchControllerRef: true
+  - name: clusterbootstrap
+    base:
+      apiVersion: containerattached.gcp.gke.cloud.google.com/v1beta1
+      kind: ClusterBootstrapJob
+      metadata:
+        name: installmanifest
+        labels:
+          name: attachedclusterbootstrap
+      spec:
+        clusterConfig:
+          project: ""
+          id: ""
+          location: us-west1
+          platformVersion: ""
+        clusterCredentials:
+          source: Secret
+          secretRef:
+            namespace: default
+            key: kubeconfig
+    patches:
+    - fromFieldPath: spec.parameters.k8sVersion
+      toFieldPath: spec.clusterConfig.platformVersion
+      transforms:
+      - type: map
+        map:
+          1.24: 1.24.0-gke.1
+          1.25: 1.25.0-gke.2
+    - fromFieldPath: status.clusterName
+      toFieldPath: spec.clusterConfig.id
+    - fromFieldPath: spec.parameters.fleetProject
+      toFieldPath: spec.clusterConfig.project
+    - fromFieldPath: metadata.uid
+      toFieldPath: spec.clusterCredentials.secretRef.name
+      transforms:
+      - type: string
+        string:
+          fmt: "%s-ekscluster"
+    readinessChecks:
+    - type: NonEmpty
+      fieldPath: status.succeeded
+  - name: attachedCluster
+    base:
+      apiVersion: containerattached.gcp.gke.cloud.google.com/v1beta1
+      kind: Cluster
+      metadata:
+        name: attachedcluster
+      spec:
+        forProvider:
+          distribution: eks
+          location: us-west1
+          fleet:
+          - project: "project/<project-number>"
+    patches:
+    - fromFieldPath: spec.parameters.k8sVersion
+      toFieldPath: spec.forProvider.platformVersion
+      transforms:
+      - type: map
+        map:
+          1.24: 1.24.0-gke.1
+          1.25: 1.25.0-gke.2
+    - fromFieldPath: status.odicIssuerUrl
+      toFieldPath: spec.forProvider.oidcConfig[0].issuerUrl
+    - fromFieldPath: spec.parameters.fleetProject
+      toFieldPath: spec.forProvider.fleet[0].project
+      transforms:
+      - type: string
+        string:
+          fmt: "projects/%s"
+    - fromFieldPath: spec.parameters.adminUsers
+      toFieldPath: spec.forProvider.authorization[0].adminUsers
+    - fromFieldPath: status.clusterName
+      toFieldPath: metadata.annotations[crossplane.io/external-name]

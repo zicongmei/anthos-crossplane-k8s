@@ -1,0 +1,13 @@
+apiVersion: demo.anthos.com/v1
+kind: CompositeNetwork
+metadata:
+  name: test-network-1
+spec:
+  compositionRef:
+    name: anthos-aws-network
+  parameters:
+    region: us-east-1
+    gcpProjectNumber: "933682497375"
+  writeConnectionSecretToRef:
+    namespace: default
+    name: b-team
