@@ -1,7 +1,7 @@
 apiVersion: demo.anthos.com/v1
 kind: CompositeCluster 
 metadata:
-  name: test-zicong-2
+  name: test-zicong-1
 spec:
   compositionRef:
     # Possible values cluster-gcp-gke, cluster-aws-eks, cluster-azure-aks
