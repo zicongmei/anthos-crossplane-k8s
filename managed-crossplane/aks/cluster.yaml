@@ -1,0 +1,18 @@
+apiVersion: demo.anthos.com/v1
+kind: CompositeCluster 
+metadata:
+  name: test-zicong-3
+spec:
+  compositionRef:
+    name: cluster-azure-aks
+  parameters:
+    # Possible values small, medium, large
+    nodeSize: medium
+    k8sVersion: "1.25"
+    fleetProject: "933682497375"
+    minNodeCount: 2
+    adminUsers:
+    - zicong@google.com
+  writeConnectionSecretToRef:
+    namespace: default
+    name: b-team
