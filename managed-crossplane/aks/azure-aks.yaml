@@ -51,7 +51,7 @@ spec:
           oidcIssuerEnabled: true
           workloadIdentityEnabled: true
         writeConnectionSecretToRef:
-          name: kubeconfig
+#          name: kubeconfig
           namespace: default
     patches:
     - type: ToCompositeFieldPath
@@ -79,6 +79,12 @@ spec:
     - type: ToCompositeFieldPath
       fromFieldPath: status.conditions.status
       toFieldPath: status.controlPlaneStatus
+    - fromFieldPath: metadata.uid
+      toFieldPath: spec.writeConnectionSecretToRef.name
+      transforms:
+      - type: string
+        string:
+          fmt: "%s-akscluster"
   - name: attachedCluster
     base:
       apiVersion: containerattached.gcp.gke.cloud.google.com/v1beta1

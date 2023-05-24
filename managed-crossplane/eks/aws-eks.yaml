@@ -71,7 +71,6 @@ spec:
           clusterNameSelector:
             matchControllerRef: true
         writeConnectionSecretToRef:
-          name: kubeconfig
           namespace: default
     patches:
     - fromFieldPath: metadata.uid
