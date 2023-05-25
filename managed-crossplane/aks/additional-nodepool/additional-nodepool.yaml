@@ -4,6 +4,6 @@ metadata:
   name: test-zicong-10-nodepool-1
 spec:
   compositionRef:
-    name: cluster-aws-eks-nodepool
+    name: cluster-azure-aks-nodepool
   parameters:
     minNodeCount: 2
