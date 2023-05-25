@@ -1,0 +1,44 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: cluster-azure-aks-nodepool
+  labels:
+    crossplane.io/xrd: compositenodepools.demo.anthos.com
+    provider: azure
+    cluster: aks
+spec:
+  compositeTypeRef:
+    apiVersion: demo.anthos.com/v1
+    kind:  CompositeNodepool
+  patchSets:
+  - name: metadata
+    patches:
+    - fromFieldPath: metadata.labels
+  resources:
+  - name: eksnodegroup
+    base:
+      apiVersion: containerservice.azure.gke.cloud.google.com/v1beta1
+      kind: KubernetesClusterNodePool
+      spec:
+        providerConfigRef:
+          name: default-azure
+        forProvider:
+          kubernetesClusterIdSelector:
+            matchControllerRef: false
+            matchLabels:
+              role: controlplane
+          nodeCount: 1
+          tags:
+            Environment: Production
+          vmSize: Standard_DS2_v2
+    patches:
+    - fromFieldPath: metadata.name
+      toFieldPath: metadata.name
+    - type: ToCompositeFieldPath
+      fromFieldPath: metadata.annotations[crossplane.io/external-name]
+      toFieldPath: status.nodePoolName
+    - type: ToCompositeFieldPath
+      fromFieldPath: status.atProvider.status
+      toFieldPath: status.nodePoolStatus
+    - fromFieldPath: spec.parameters.minNodeCount
+      toFieldPath: spec.forProvider.nodeCount

@@ -33,7 +33,7 @@ spec:
               role: nodegroup
           scalingConfig:
           - desiredSize: 1
-            maxSize: 1
+            maxSize: 6
             minSize: 1
           subnetIdSelector:
             matchControllerRef: false
@@ -55,3 +55,7 @@ spec:
     - type: ToCompositeFieldPath
       fromFieldPath: status.atProvider.status
       toFieldPath: status.nodePoolStatus
+    - fromFieldPath: spec.parameters.minNodeCount
+      toFieldPath: spec.forProvider.scalingConfig[0].minSize
+    - fromFieldPath: spec.parameters.minNodeCount
+      toFieldPath: spec.forProvider.scalingConfig[0].desiredSize

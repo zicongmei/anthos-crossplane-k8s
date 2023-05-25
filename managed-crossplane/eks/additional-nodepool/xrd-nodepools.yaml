@@ -30,6 +30,8 @@ spec:
 #                    type: string
                   region:
                     type: string
+                  minNodeCount:
+                    type: integer
                 type: object
           status:
             type: object

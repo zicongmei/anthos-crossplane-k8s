@@ -26,12 +26,12 @@ spec:
               parameters:
                 description: "Parameters for creating a new node pool"
                 properties:
-                  clusterName:
+#                  clusterName:
+#                    type: string
+                  region:
                     type: string
                   minNodeCount:
                     type: integer
-                  nodeSize:
-                    type: string
                 type: object
           status:
             type: object
@@ -39,10 +39,12 @@ spec:
             properties:
               nodePoolStatus:
                 type: string
+              nodePoolName:
+                type: string
     additionalPrinterColumns:
     - name: nodePoolName
       type: string
-      jsonPath: ".status.clusterName"
+      jsonPath: ".status.nodePoolName"
     - name: nodePool
       type: string
       jsonPath: ".status.nodePoolStatus"
