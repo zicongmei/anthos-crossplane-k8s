@@ -19,6 +19,8 @@ spec:
     base:
       apiVersion: containerservice.azure.gke.cloud.google.com/v1beta1
       kind: KubernetesClusterNodePool
+      metadata:
+        name: nodepool1
       spec:
         providerConfigRef:
           name: default-azure
@@ -32,8 +34,6 @@ spec:
             Environment: Production
           vmSize: Standard_DS2_v2
     patches:
-    - fromFieldPath: metadata.name
-      toFieldPath: metadata.name
     - type: ToCompositeFieldPath
       fromFieldPath: metadata.annotations[crossplane.io/external-name]
       toFieldPath: status.nodePoolName
