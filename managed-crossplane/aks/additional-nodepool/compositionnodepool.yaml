@@ -19,8 +19,6 @@ spec:
     base:
       apiVersion: containerservice.azure.gke.cloud.google.com/v1beta1
       kind: KubernetesClusterNodePool
-      metadata:
-        name: np1
       spec:
         providerConfigRef:
           name: default-azure

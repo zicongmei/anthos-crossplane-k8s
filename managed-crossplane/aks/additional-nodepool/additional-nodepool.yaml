@@ -1,7 +1,7 @@
 apiVersion: demo.anthos.com/v1
 kind: CompositeNodepool
 metadata:
-  name: np-1
+  name: np1
 spec:
   compositionRef:
     name: cluster-azure-aks-nodepool
