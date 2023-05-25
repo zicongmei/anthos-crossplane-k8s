@@ -1,0 +1,10 @@
+apiVersion: demo.anthos.com/v1
+kind: CompositeNodepool
+metadata:
+  name: test-zicong-2-nodepool-2
+spec:
+  compositionRef:
+    name: cluster-aws-eks-nodepool
+  parameters:
+#    clusterName: test-zicong-2-g752d
+    region: us-east-1
