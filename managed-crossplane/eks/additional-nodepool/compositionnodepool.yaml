@@ -40,8 +40,8 @@ spec:
             matchLabels:
               role: nodegroup
     patches:
-    - fromFieldPath: metadata.name
-      toFieldPath: metadata.name
+#    - fromFieldPath: metadata.name
+#      toFieldPath: metadata.name
 #    - fromFieldPath: spec.parameters.clusterName
 #      toFieldPath: spec.forProvider.clusterNameRef.name
     - fromFieldPath: spec.parameters.region
