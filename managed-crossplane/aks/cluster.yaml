@@ -8,7 +8,7 @@ spec:
   parameters:
     # Possible values small, medium, large
     nodeSize: medium
-    k8sVersion: "1.25"
+    k8sVersion: "1.24"
     fleetProject: "933682497375"
     minNodeCount: 2
     adminUsers:
