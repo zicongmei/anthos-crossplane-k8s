@@ -1,0 +1,14 @@
+apiVersion: azure.gke.cloud.google.com/v1beta1
+kind: ResourceGroup
+metadata:
+  name: import
+  annotations:
+    crossplane.io/external-name: zicong-import-vital-mammoth
+spec:
+  managementPolicy: FullControl
+#  managementPolicy: ObserveOnly
+  providerConfigRef:
+    name: default-azure
+  forProvider:
+#    {}
+    location: eastus

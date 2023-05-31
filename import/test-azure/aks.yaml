@@ -1,0 +1,25 @@
+apiVersion: containerservice.azure.gke.cloud.google.com/v1beta1
+kind: KubernetesCluster
+metadata:
+  labels:
+    role: controlplane
+  annotations:
+    crossplane.io/external-name: zicong-import-vital-mammoth
+  name: import
+spec:
+  managementPolicy: FullControl
+#  managementPolicy: ObserveOnly
+  providerConfigRef:
+    name: default-azure
+  writeConnectionSecretToRef:
+    name: import-aks-kubeconfig
+    namespace: default
+  forProvider:
+    defaultNodePool:
+    - name: default
+      vmSize: Standard_B2s
+    dnsPrefix: zicong-import-vital-mammoth-k8s
+    identity:
+    - type: SystemAssigned
+    location: eastus
+    resourceGroupName: zicong-import-vital-mammoth
