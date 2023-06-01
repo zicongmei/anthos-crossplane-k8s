@@ -19,4 +19,5 @@ Keep a note of the terraform outputs. They are the values of the `crossplane.io/
 
 ## Change the import with full control
 - Change the `managementPolicy` to `FullControl` in the yaml files.
+- Copy in the required fields from `atProvider` to `forProvider`. 
 - kubectl apply the yaml files.
