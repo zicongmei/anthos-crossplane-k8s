@@ -12,8 +12,8 @@ spec:
   providerConfigRef:
     name: default-azure
   forProvider:
-    kubernetesClusterIdSelector:
+    kubernetesClusterIdSelector: # kubernetesClusterId is always needed. It can be from a selector or hard-coded.
       matchControllerRef: false
       matchLabels:
         role: controlplane
-    vmSize: Standard_DS2_v2
+    vmSize: Standard_DS2_v2 # this is only needed during FullControl

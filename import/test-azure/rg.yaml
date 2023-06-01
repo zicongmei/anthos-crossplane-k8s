@@ -10,5 +10,5 @@ spec:
   providerConfigRef:
     name: default-azure
   forProvider:
-#    {}
-    location: eastus
+#    {} # no info is needed when ObserveOnly
+    location: eastus # this is only needed during FullControl
