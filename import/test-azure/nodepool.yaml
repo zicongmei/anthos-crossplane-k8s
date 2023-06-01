@@ -1,0 +1,19 @@
+apiVersion: containerservice.azure.gke.cloud.google.com/v1beta1
+kind: KubernetesClusterNodePool
+metadata:
+  labels:
+    role: nodepool
+  annotations:
+    crossplane.io/external-name: np1
+  name: import
+spec:
+  managementPolicy: FullControl
+#  managementPolicy: ObserveOnly
+  providerConfigRef:
+    name: default-azure
+  forProvider:
+    kubernetesClusterIdSelector:
+      matchControllerRef: false
+      matchLabels:
+        role: controlplane
+    vmSize: Standard_DS2_v2

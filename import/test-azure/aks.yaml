@@ -7,8 +7,8 @@ metadata:
     crossplane.io/external-name: zicong-import-vital-mammoth
   name: import
 spec:
-  managementPolicy: FullControl
-#  managementPolicy: ObserveOnly
+#  managementPolicy: FullControl
+  managementPolicy: ObserveOnly
   providerConfigRef:
     name: default-azure
   writeConnectionSecretToRef:
