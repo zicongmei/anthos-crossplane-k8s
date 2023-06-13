@@ -7,13 +7,15 @@ metadata:
     crossplane.io/external-name: np1
   name: import
 spec:
-  managementPolicy: FullControl
-#  managementPolicy: ObserveOnly
+#  managementPolicy: FullControl
+  managementPolicy: ObserveOnly
   providerConfigRef:
     name: default-azure
   forProvider:
-    kubernetesClusterIdSelector: # kubernetesClusterId is always needed. It can be from a selector or hard-coded.
-      matchControllerRef: false
-      matchLabels:
-        role: controlplane
+    # kubernetesClusterId is always needed. It can be from a selector or hard-coded.
+    kubernetesClusterId: '/subscriptions/d00494d6-6f3c-4280-bbb2-899e163d1d30/resourceGroups/zicong-import-vital-mammoth/providers/Microsoft.ContainerService/managedClusters/zicong-import-vital-mammoth'
+#    kubernetesClusterIdSelector:
+#      matchControllerRef: false
+#      matchLabels:
+#        role: controlplane
     vmSize: Standard_DS2_v2 # this is only needed during FullControl

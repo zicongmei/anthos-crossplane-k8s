@@ -5,8 +5,8 @@ metadata:
   annotations:
     crossplane.io/external-name: zicong-import-vital-mammoth
 spec:
-  managementPolicy: FullControl
-#  managementPolicy: ObserveOnly
+#  managementPolicy: FullControl
+  managementPolicy: ObserveOnly
   providerConfigRef:
     name: default-azure
   forProvider:
