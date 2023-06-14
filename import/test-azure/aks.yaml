@@ -5,7 +5,7 @@ metadata:
     role: controlplane
   annotations:
     crossplane.io/external-name: zicong-import-vital-mammoth
-  name: import
+  name: imported-aks
 spec:
 #  managementPolicy: FullControl
   managementPolicy: ObserveOnly

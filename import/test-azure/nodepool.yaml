@@ -5,7 +5,7 @@ metadata:
     role: nodepool
   annotations:
     crossplane.io/external-name: np1
-  name: import
+  name: imported-np
 spec:
 #  managementPolicy: FullControl
   managementPolicy: ObserveOnly
@@ -13,7 +13,9 @@ spec:
     name: default-azure
   forProvider:
     # kubernetesClusterId is always needed. It can be from a selector or hard-coded.
-    kubernetesClusterId: '/subscriptions/d00494d6-6f3c-4280-bbb2-899e163d1d30/resourceGroups/zicong-import-vital-mammoth/providers/Microsoft.ContainerService/managedClusters/zicong-import-vital-mammoth'
+#    kubernetesClusterId: '/subscriptions/d00494d6-6f3c-4280-bbb2-899e163d1d30/resourceGroups/zicong-import-vital-mammoth/providers/Microsoft.ContainerService/managedClusters/zicong-import-vital-mammoth'
+    kubernetesClusterIdRef:
+      name: imported-aks
 #    kubernetesClusterIdSelector:
 #      matchControllerRef: false
 #      matchLabels:
